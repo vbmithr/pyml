@@ -14,9 +14,7 @@ pyarray_of_bigarray_wrapper(
     pyml_assert_initialized();
     PyObject *c_api = pyml_unwrap(numpy_api_ocaml);
     void **PyArray_API = pyml_get_pyarray_api(c_api);
-    PyObject *(*PyArray_New)
-        (PyTypeObject *, int, npy_intp *, int, npy_intp *, void *, int, int,
-         PyObject *) = PyArray_API[93];
+    PyObject *(*PyArray_SimpleNewFromData) (int, npy_intp *, int, void *) = PyArray_API[95];
     int nd = Caml_ba_array_val(bigarray_ocaml)->num_dims;
     npy_intp *dims = malloc(nd * sizeof(npy_intp));
     int i;
@@ -82,11 +80,7 @@ pyarray_of_bigarray_wrapper(
         failwith("Unsupported bigarray layout for NumPy array");
     }
     void *data = Caml_ba_data_val(bigarray_ocaml);
-    PyTypeObject (*PyArray_SubType) =
-        (PyTypeObject *) pyml_unwrap(bigarray_type_ocaml);
-    PyObject *result = PyArray_New(
-        PyArray_SubType, nd, dims, type_num, NULL, data, 0,
-        np_flags, NULL);
+    PyObject *result = PyArray_SimpleNewFromData(nd, dims, type_num, data);
     free(dims);
     CAMLreturn(pyml_wrap(result, true));
 }
